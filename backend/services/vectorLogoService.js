@@ -1,0 +1,243 @@
+/**
+ * EMBLEM Vector Logo Engine
+ * Deterministically generates high-precision SVG logos from Brand DNA.
+ * No external image-generation APIs. Pure SVG paths, typography styling, and clear space specs.
+ */
+
+// Curated geometric & iconic vector marks (viewBox: 0 0 48 48, strokeWidth: 2.5)
+const VECTOR_MARKS = {
+  // Minimal & Modern
+  minimal: {
+    geometric_prism: `<polygon points="24 4, 44 38, 4 38" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><polygon points="24 16, 36 38, 12 38" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>`,
+    minimal_circle_intersect: `<circle cx="20" cy="24" r="14" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="28" cy="24" r="14" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2.5"/>`,
+    minimal_slash_square: `<rect x="8" y="8" width="32" height="32" rx="4" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="8" y1="40" x2="40" y2="8" stroke="currentColor" stroke-width="2.5"/>`,
+    minimal_stacked_bars: `<rect x="6" y="10" width="36" height="5" rx="2.5" fill="currentColor"/><rect x="6" y="21.5" width="24" height="5" rx="2.5" fill="currentColor"/><rect x="6" y="33" width="16" height="5" rx="2.5" fill="currentColor"/>`,
+    minimal_diamond_compass: `<rect x="10" y="10" width="28" height="28" rx="2" transform="rotate(45 24 24)" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="24" r="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="24" r="2" fill="currentColor"/>`,
+    minimal_offset_quad: `<rect x="8" y="8" width="24" height="24" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="16" y="16" width="24" height="24" rx="3" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="2.5"/>`,
+    minimal_bauhaus_portal: `<path d="M10 38 L10 24 A14 14 0 0 1 38 24 L38 38 Z" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="24" r="6" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="1.5"/><line x1="6" y1="38" x2="42" y2="38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`,
+    minimal_zen_ring: `<path d="M24 6 A18 18 0 1 1 8 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="36" cy="12" r="3" fill="currentColor"/>`
+  },
+  // Tech & Innovation
+  tech: {
+    circuit_node: `<rect x="6" y="6" width="36" height="36" rx="8" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="24" r="6" fill="currentColor"/><line x1="24" y1="6" x2="24" y2="18" stroke="currentColor" stroke-width="2"/><line x1="24" y1="30" x2="24" y2="42" stroke="currentColor" stroke-width="2"/><line x1="6" y1="24" x2="18" y2="24" stroke="currentColor" stroke-width="2"/><line x1="30" y1="24" x2="42" y2="24" stroke="currentColor" stroke-width="2"/>`,
+    cube_dimension: `<path d="M24 4 L42 14 L42 34 L24 44 L6 34 L6 14 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><line x1="24" y1="24" x2="42" y2="14" stroke="currentColor" stroke-width="2"/><line x1="24" y1="24" x2="6" y2="14" stroke="currentColor" stroke-width="2"/><line x1="24" y1="24" x2="24" y2="44" stroke="currentColor" stroke-width="2"/>`,
+    quantum_orbit: `<ellipse cx="24" cy="24" rx="18" ry="7" transform="rotate(30 24 24)" fill="none" stroke="currentColor" stroke-width="2.5"/><ellipse cx="24" cy="24" rx="18" ry="7" transform="rotate(-30 24 24)" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="24" r="5" fill="currentColor"/>`,
+    neural_synapse: `<circle cx="12" cy="14" r="4" fill="currentColor"/><circle cx="12" cy="34" r="4" fill="currentColor"/><circle cx="36" cy="14" r="4" fill="currentColor"/><circle cx="36" cy="34" r="4" fill="currentColor"/><circle cx="24" cy="24" r="5" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="2"/><line x1="12" y1="14" x2="24" y2="24" stroke="currentColor" stroke-width="2"/><line x1="12" y1="34" x2="24" y2="24" stroke="currentColor" stroke-width="2"/><line x1="36" y1="14" x2="24" y2="24" stroke="currentColor" stroke-width="2"/><line x1="36" y1="34" x2="24" y2="24" stroke="currentColor" stroke-width="2"/><line x1="12" y1="14" x2="12" y2="34" stroke="currentColor" stroke-width="1.5"/><line x1="36" y1="14" x2="36" y2="34" stroke="currentColor" stroke-width="1.5"/>`,
+    matrix_hex_core: `<polygon points="24 4, 42 14, 42 34, 24 44, 6 34, 6 14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><polygon points="24 14, 33 19, 33 29, 24 34, 15 29, 15 19" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="24" cy="24" r="3" fill="currentColor"/>`,
+    binary_brackets: `<path d="M16 10 L8 18 L8 30 L16 38" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 10 L40 18 L40 30 L32 38" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="20" y1="24" x2="28" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="24" r="2" fill="currentColor"/>`,
+    satellite_radar: `<path d="M8 40 A22 22 0 0 1 40 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M8 32 A14 14 0 0 1 32 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M8 24 A6 6 0 0 1 24 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="8" r="4" fill="currentColor"/>`,
+    spectrum_prism: `<polygon points="8 40, 24 8, 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><line x1="6" y1="28" x2="20" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="26" y1="23" x2="44" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="28" y1="27" x2="44" y2="28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="29" y1="31" x2="44" y2="38" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`
+  },
+  // Luxury & Elegance
+  luxury: {
+    crest_diamond: `<polygon points="24 4, 42 20, 24 44, 6 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><polygon points="24 12, 34 20, 24 36, 14 20" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.5"/>`,
+    crown_pillar: `<path d="M8 38 L40 38 M10 38 L6 14 L18 24 L24 10 L30 24 L42 14 L38 38 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="24" cy="8" r="2" fill="currentColor"/><circle cx="6" cy="12" r="2" fill="currentColor"/><circle cx="42" cy="12" r="2" fill="currentColor"/>`,
+    arch_monogram: `<path d="M12 40 L12 22 A12 12 0 0 1 36 22 L36 40" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="8" y1="40" x2="40" y2="40" stroke="currentColor" stroke-width="2.5"/><circle cx="24" cy="26" r="4" fill="currentColor"/>`,
+    fleur_sovereign: `<path d="M24 6 C24 6 20 18 14 20 C8 22 6 16 6 16 C6 28 16 32 24 42 C32 32 42 28 42 16 C42 16 40 22 34 20 C28 18 24 6 24 6 Z" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><line x1="24" y1="12" x2="24" y2="38" stroke="currentColor" stroke-width="2"/>`,
+    interlocking_gem: `<rect x="9" y="9" width="22" height="22" rx="4" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="17" y="17" width="22" height="22" rx="4" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="2.2"/><circle cx="24" cy="24" r="3" fill="currentColor"/>`,
+    palais_monolith: `<line x1="8" y1="8" x2="40" y2="8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="12" y1="13" x2="36" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="14" x2="16" y2="35" stroke="currentColor" stroke-width="2.2"/><line x1="24" y1="14" x2="24" y2="35" stroke="currentColor" stroke-width="2.2"/><line x1="32" y1="14" x2="32" y2="35" stroke="currentColor" stroke-width="2.2"/><line x1="10" y1="36" x2="38" y2="36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="41" x2="42" y2="41" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`,
+    solitaire_star: `<polygon points="24 4, 27 19, 42 24, 27 29, 24 44, 21 29, 6 24, 21 19" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="24" r="3" fill="currentColor"/>`,
+    shield_crest_regal: `<path d="M10 8 L38 8 C38 8 40 26 24 42 C8 26 10 8 10 8 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><line x1="24" y1="10" x2="24" y2="38" stroke="currentColor" stroke-width="1.8"/><line x1="11" y1="22" x2="37" y2="22" stroke="currentColor" stroke-width="1.8"/>`
+  },
+  // Organic & Sustainable
+  organic: {
+    botanical_leaf: `<path d="M10 38 C10 38 12 18 36 10 C36 10 38 30 14 38 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M10 38 C18 30 26 22 36 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 28 C26 26 28 22 28 22" stroke="currentColor" stroke-width="1.5"/>`,
+    solar_sprout: `<circle cx="24" cy="16" r="8" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M14 38 C14 30 24 28 24 28 C24 28 34 30 34 38" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="24" y1="28" x2="24" y2="42" stroke="currentColor" stroke-width="2.5"/>`,
+    wave_ripple: `<path d="M6 28 C12 22 18 34 24 28 C30 22 36 34 42 28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M6 20 C12 14 18 26 24 20 C30 14 36 26 42 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M6 36 C12 30 18 42 24 36 C30 30 36 42 42 36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`,
+    twin_flora: `<path d="M24 42 L24 16 M24 26 C16 26 12 18 16 12 C20 18 24 22 24 22 M24 32 C32 32 36 24 32 18 C28 24 24 28 24 28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="10" r="3" fill="currentColor"/>`,
+    terra_strata: `<ellipse cx="24" cy="24" rx="19" ry="16" fill="none" stroke="currentColor" stroke-width="2.5"/><ellipse cx="24" cy="24" rx="12" ry="10" fill="none" stroke="currentColor" stroke-width="2"/><ellipse cx="24" cy="24" rx="5" ry="4" fill="currentColor" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/>`,
+    seed_of_life: `<circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="24" cy="14" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="24" cy="34" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="15" cy="24" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="33" cy="24" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="24" cy="24" r="3" fill="currentColor"/>`,
+    spiral_nautilus: `<path d="M24 24 A3 3 0 0 1 21 21 A6 6 0 0 1 27 15 A12 12 0 0 1 39 27 A18 18 0 0 1 21 45 A24 24 0 0 1 4 21" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`,
+    sun_horizon: `<path d="M12 24 A12 12 0 0 1 36 24 Z" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><line x1="6" y1="28" x2="42" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="10" y1="34" x2="38" y2="34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="40" x2="32" y2="40" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`
+  },
+  // Bold & Dynamic
+  bold: {
+    lightning_apex: `<polygon points="26 4, 10 26, 22 26, 20 44, 38 20, 26 20" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>`,
+    shield_valor: `<path d="M24 4 L40 10 L40 24 C40 33 24 42 24 42 C24 42 8 33 8 24 L8 10 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M24 12 L32 16 L32 24 C32 29 24 34 24 34 Z" fill="currentColor" fill-opacity="0.3"/>`,
+    nexus_burst: `<circle cx="24" cy="24" r="8" fill="currentColor"/><line x1="24" y1="4" x2="24" y2="12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="24" y1="36" x2="24" y2="44" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="4" y1="24" x2="12" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><line x1="36" y1="24" x2="44" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`,
+    chevron_forge: `<path d="M10 8 L24 22 L10 36 M22 8 L36 22 L22 36" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+    monolith_pillar: `<rect x="6" y="8" width="8" height="32" rx="2" fill="currentColor"/><rect x="20" y="4" width="8" height="40" rx="2" fill="currentColor"/><rect x="34" y="14" width="8" height="26" rx="2" fill="currentColor"/>`,
+    impact_polygon: `<polygon points="12 4, 36 4, 44 20, 24 44, 4 20" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><line x1="4" y1="20" x2="44" y2="20" stroke="currentColor" stroke-width="2.5"/><line x1="12" y1="4" x2="24" y2="44" stroke="currentColor" stroke-width="2.5"/><line x1="36" y1="4" x2="24" y2="44" stroke="currentColor" stroke-width="2.5"/>`,
+    vortex_turbine: `<circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="3"/><path d="M24 6 L24 24 L38 32 M24 24 L10 32" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="24" r="4" fill="currentColor"/>`,
+    barricade_cross: `<line x1="8" y1="8" x2="40" y2="40" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="8" x2="8" y2="40" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="24" cy="24" r="6" fill="#FFF" stroke="currentColor" stroke-width="3"/>`
+  }
+};
+
+/**
+ * Selects an SVG mark based on logoStyleToken and company name hash
+ */
+function selectMark(logoStyleToken = 'minimal', companyName = '') {
+  const category = VECTOR_MARKS[logoStyleToken] || VECTOR_MARKS.minimal;
+  const keys = Object.keys(category);
+  let hash = 0;
+  for (let i = 0; i < companyName.length; i++) {
+    hash = (hash << 5) - hash + companyName.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % keys.length;
+  const key = keys[index];
+  return {
+    key,
+    svgPath: category[key]
+  };
+}
+
+/**
+ * Generates all 5 logo variants for a brand
+ * @param {Object} brand - Brand document
+ * @param {Object} brandDNA - BrandDNA document
+ */
+function generateLogoSuite(brand, brandDNA) {
+  const companyName = (brand?.companyName || 'EMBLEM').toUpperCase();
+  const tagline = (brandDNA?.tagline || '').toUpperCase();
+  const primaryColor = brandDNA?.colors?.primary || '#111111';
+  const accentColor = brandDNA?.colors?.accent || '#FF4F00';
+  const surfaceColor = brandDNA?.colors?.surface || '#FFFFFF';
+  const displayFont = brandDNA?.typography?.display?.family || 'Syne, sans-serif';
+  const monoFont = brandDNA?.typography?.mono?.family || 'JetBrains Mono, monospace';
+  const logoStyleToken = brandDNA?.logoStyleToken || 'minimal';
+
+  let markOptions = VECTOR_MARKS[logoStyleToken] || VECTOR_MARKS.minimal;
+  const requestedMark = brandDNA?.logoMarkId;
+  let resolvedMarkPath = requestedMark ? markOptions[requestedMark] : null;
+  if (requestedMark && !resolvedMarkPath) {
+    for (const cat of Object.values(VECTOR_MARKS)) {
+      if (cat[requestedMark]) {
+        resolvedMarkPath = cat[requestedMark];
+        break;
+      }
+    }
+  }
+  const { key: markKey, svgPath } = requestedMark && resolvedMarkPath
+    ? { key: requestedMark, svgPath: resolvedMarkPath }
+    : selectMark(logoStyleToken, companyName);
+
+  // Specifications
+  const specs = {
+    clearSpaceRule: '1x mark width (48px digital minimum safety perimeter)',
+    minDigitalSize: '24px height',
+    minPrintSize: '15mm height',
+    gridRatio: '1:1.618 (Golden section typography spacing)',
+    markIdentifier: `${logoStyleToken}_${markKey}`
+  };
+
+  // 1. Primary: Horizontal Lockup (400 x 100)
+  const primarySvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="400" height="100" class="emblem-logo-primary">
+  <defs>
+    <style>
+      .brand-title { font-family: ${displayFont}; font-size: 26px; font-weight: 800; letter-spacing: 0.15em; fill: ${primaryColor}; }
+      .brand-tagline { font-family: ${monoFont}; font-size: 8px; font-weight: 600; letter-spacing: 0.28em; fill: ${accentColor}; }
+      .brand-mark { color: ${primaryColor}; }
+    </style>
+  </defs>
+  <!-- Background transparent -->
+  <g transform="translate(24, 26)" class="brand-mark">
+    <svg width="48" height="48" viewBox="0 0 48 48">
+      ${svgPath}
+    </svg>
+  </g>
+  <text x="88" y="52" class="brand-title">${companyName}</text>
+  ${tagline ? `<text x="90" y="68" class="brand-tagline">${tagline}</text>` : ''}
+</svg>`.trim();
+
+  // 2. Stacked: Vertical Lockup (240 x 240)
+  const stackedSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" class="emblem-logo-stacked">
+  <defs>
+    <style>
+      .brand-title-stacked { font-family: ${displayFont}; font-size: 22px; font-weight: 800; letter-spacing: 0.2em; fill: ${primaryColor}; text-anchor: middle; }
+      .brand-tagline-stacked { font-family: ${monoFont}; font-size: 7.5px; font-weight: 600; letter-spacing: 0.3em; fill: ${accentColor}; text-anchor: middle; }
+      .brand-mark-stacked { color: ${primaryColor}; }
+    </style>
+  </defs>
+  <g transform="translate(92, 44)" class="brand-mark-stacked">
+    <svg width="56" height="56" viewBox="0 0 48 48">
+      ${svgPath}
+    </svg>
+  </g>
+  <text x="120" y="142" class="brand-title-stacked">${companyName}</text>
+  ${tagline ? `<text x="120" y="162" class="brand-tagline-stacked">${tagline}</text>` : ''}
+</svg>`.trim();
+
+  // 3. Mark Only: Isolated in frame (120 x 120)
+  const markSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" class="emblem-logo-mark">
+  <rect width="120" height="120" rx="24" fill="${surfaceColor}" stroke="${primaryColor}" stroke-opacity="0.12" stroke-width="1.5"/>
+  <g transform="translate(32, 32)" style="color: ${primaryColor};">
+    <svg width="56" height="56" viewBox="0 0 48 48">
+      ${svgPath}
+    </svg>
+  </g>
+</svg>`.trim();
+
+  // 4. Mono Light: On White background (400 x 100)
+  const monoLightSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="400" height="100" class="emblem-logo-mono-light">
+  <rect width="400" height="100" fill="#FFFFFF"/>
+  <g transform="translate(24, 26)" style="color: #0A0A0A;">
+    <svg width="48" height="48" viewBox="0 0 48 48">
+      ${svgPath}
+    </svg>
+  </g>
+  <text x="88" y="52" style="font-family: ${displayFont}; font-size: 26px; font-weight: 800; letter-spacing: 0.15em; fill: #0A0A0A;">${companyName}</text>
+  ${tagline ? `<text x="90" y="68" style="font-family: ${monoFont}; font-size: 8px; font-weight: 600; letter-spacing: 0.28em; fill: #555555;">${tagline}</text>` : ''}
+</svg>`.trim();
+
+  // 5. Mono Dark: On Dark background (400 x 100)
+  const monoDarkSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="400" height="100" class="emblem-logo-mono-dark">
+  <rect width="400" height="100" fill="#0A0A0A"/>
+  <g transform="translate(24, 26)" style="color: #FFFFFF;">
+    <svg width="48" height="48" viewBox="0 0 48 48">
+      ${svgPath}
+    </svg>
+  </g>
+  <text x="88" y="52" style="font-family: ${displayFont}; font-size: 26px; font-weight: 800; letter-spacing: 0.15em; fill: #FFFFFF;">${companyName}</text>
+  ${tagline ? `<text x="90" y="68" style="font-family: ${monoFont}; font-size: 8px; font-weight: 600; letter-spacing: 0.28em; fill: #AAAAAA;">${tagline}</text>` : ''}
+</svg>`.trim();
+
+  return {
+    specs,
+    markKey,
+    svgPath,
+    variants: {
+      logo_primary: {
+        type: 'logo_primary',
+        svg: primarySvg,
+        name: 'Primary Horizontal Lockup',
+        dimensions: '400x100'
+      },
+      logo_stacked: {
+        type: 'logo_stacked',
+        svg: stackedSvg,
+        name: 'Stacked Vertical Lockup',
+        dimensions: '240x240'
+      },
+      logo_mark: {
+        type: 'logo_mark',
+        svg: markSvg,
+        name: 'Icon Mark / App Icon',
+        dimensions: '120x120'
+      },
+      logo_mono_light: {
+        type: 'logo_mono_light',
+        svg: monoLightSvg,
+        name: 'Monochrome Light Lockup',
+        dimensions: '400x100'
+      },
+      logo_mono_dark: {
+        type: 'logo_mono_dark',
+        svg: monoDarkSvg,
+        name: 'Monochrome Dark Lockup',
+        dimensions: '400x100'
+      }
+    }
+  };
+}
+
+module.exports = {
+  VECTOR_MARKS,
+  selectMark,
+  generateLogoSuite
+};

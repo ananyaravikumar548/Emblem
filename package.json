@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "node backend/server.js",
+    "server": "node backend/server.js",
+    "postinstall": "npm --prefix backend ci --omit=dev",
+    "build": "npm --prefix frontend ci && npm --prefix frontend run build"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.3.3"
+  }
+}
